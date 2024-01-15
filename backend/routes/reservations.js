@@ -5,19 +5,25 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    if (
-      !req.body.name ||
-      !req.body.contact_info ||
-      !req.body.date ||
-      !req.body.time ||
-      !req.body.number_of_seats ||
-      !req.body.special_request ||
-      !req.body.table_preferance ||
-      !req.body.membership ||
-      !req.body.status ||
-      !req.body.additional_services
-    ) {
-      return res.status(400).send({ message: "Send all required fields" });
+    const requiredFields = [
+      "name",
+      "contact_info",
+      "date",
+      "time",
+      "number_of_seats",
+      "special_request",
+      "table_preferance",
+      "membership",
+      "status",
+      "additional_services",
+    ];
+
+    const missingFields = requiredFields.filter((field) => !req.body[field]);
+
+    if (missingFields.length > 0) {
+      return res.status(400).send({
+        message: `Missing required fields: ${missingFields.join(", ")}`,
+      });
     }
 
     const newReservation = {
@@ -62,11 +68,12 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const reservation = await Reservation.findById(id);
+    const reservation = await reservationModel.findById(id);
     return res.status(200).json({
       count: reservation.length,
       data: reservation,
     });
+    Reservation;
   } catch (error) {
     console.error(error.message);
     res.status(500).send({ message: error.message });
@@ -75,22 +82,37 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   try {
-    if (
-      !req.body.username ||
-      !req.body.numberofseats ||
-      !req.body.reservationdate
-    ) {
-      res.status(400).send({ message: "Send all required fields" });
+    const requiredFields = [
+      "name",
+      "contact_info",
+      "date",
+      "time",
+      "number_of_seats",
+      "special_request",
+      "table_preferance",
+      "membership",
+      "status",
+      "additional_services",
+    ];
+
+    const missingFields = requiredFields.filter((field) => !req.body[field]);
+
+    if (missingFields.length > 0) {
+      return res.status(400).send({
+        message: `Missing required fields: ${missingFields.join(", ")}`,
+      });
     }
 
     const { id } = req.params;
-    const result = await Reservation.findByIdAndUpdate(id, req.body);
+    const result = await reservationModel.findByIdAndUpdate(id, req.body);
+
     if (!result) {
       return res.status(404).json({ message: "Reservation Details Not Found" });
     }
+
     return res
       .status(200)
-      .json({ message: "Reservation Details Updated Succesfully" });
+      .json({ message: "Reservation Details Updated Successfully" });
   } catch (error) {
     console.error(error.message);
     res.status(500).send({ message: error.message });
@@ -100,7 +122,7 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await Reservation.findByIdAndDelete(id);
+    const result = await reservationModel.findByIdAndDelete(id);
     if (!result) {
       return res.status(404).json({ message: "Reservation Details Not Found" });
     }
